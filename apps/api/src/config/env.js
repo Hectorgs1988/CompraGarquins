@@ -10,10 +10,15 @@ dotenv.config({ path: rootEnvPath });
 
 dotenv.config();
 
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5174")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 export const env = {
     nodeEnv: process.env.NODE_ENV || "development",
     port: Number(process.env.PORT || 4000),
-    corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    corsOrigins,
     sessionSecret: process.env.SESSION_SECRET || "change-me",
     dbClient: process.env.DB_CLIENT || "postgres",
     dbHost: process.env.DB_HOST || "localhost",

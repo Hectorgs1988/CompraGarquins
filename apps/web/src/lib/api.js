@@ -1,5 +1,13 @@
-export const API_BASE_URL =
-    import.meta.env.VITE_API_URL || "http://localhost:4100";
+function resolveApiBaseUrl() {
+    if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL;
+    }
+
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:4100`;
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 export async function apiRequest(path, options = {}) {
     const response = await fetch(`${API_BASE_URL}${path}`, {

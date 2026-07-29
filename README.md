@@ -42,9 +42,22 @@ Comandos de ejemplo:
 4. Ajusta `DB_CLIENT` y credenciales en `.env` (`postgres` o `mysql2`).
 5. Inicia en desarrollo:
    - `npm run dev`
+   - Para pruebas en movil (misma Wi-Fi): `npm run dev:mobile`
 
 Frontend: http://localhost:5174
 Backend: http://localhost:4100
+
+## Pruebas En Movil
+
+1. Arranca con `npm run dev:mobile`.
+2. Busca la IP local de tu Mac (por ejemplo `192.168.1.34`).
+3. Abre en el movil: `http://TU_IP:5174`.
+
+Notas:
+
+- El frontend usa `--host 0.0.0.0` para exponer Vite en LAN.
+- Si no defines `VITE_API_URL`, el frontend usa automaticamente `http://<mismo-host>:4100`.
+- En desarrollo, la API acepta origenes LAN privados para simplificar pruebas.
 
 ## Flujo NFC (NDEF)
 

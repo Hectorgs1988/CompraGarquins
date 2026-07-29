@@ -10,9 +10,27 @@ import nfcRoutes from "./routes/nfc.routes.js";
 
 const app = express();
 
+function isPrivateLanOrigin(origin) {
+    return /^http:\/\/(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(origin);
+}
+
 app.use(
     cors({
-        origin: env.corsOrigin,
+        origin: (origin, callback) => {
+            if (!origin) {
+                return callback(null, true);
+            }
+
+            if (env.corsOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            if (env.nodeEnv === "development" && isPrivateLanOrigin(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(new Error("CORS origin not allowed"));
+        },
         credentials: true
     })
 );
