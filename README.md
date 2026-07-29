@@ -50,9 +50,10 @@ Backend: http://localhost:4100
 
 La idea base es grabar tags NFC con una URL de la app, por ejemplo:
 
-- `https://tu-dominio.app/nfc/arroz`
+- `https://tu-dominio.app/nfc/f8f3a72d19c`
 
-Al abrirla, la app interpreta el slug (`arroz`) y propone anadir/actualizar ese articulo.
+Al abrirla, el frontend consulta `GET /nfc/:token` y solo cuando pulsas el boton
+de accion ejecuta `POST /nfc/:token/consume` para anadir a la lista.
 
 ## Proximos pasos
 

@@ -1,8 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { apiRequest } from "../lib/api";
 
 function ListPage() {
     const [item, setItem] = useState("");
     const [items, setItems] = useState([]);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let mounted = true;
+
+        async function loadItems() {
+            try {
+                setError("");
+                const data = await apiRequest("/list");
+                if (mounted) {
+                    setItems(data.items || []);
+                }
+            } catch (requestError) {
+                if (mounted) {
+                    setError(requestError.message);
+                }
+            }
+        }
+
+        loadItems();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     function addItem(event) {
         event.preventDefault();
@@ -28,9 +54,13 @@ function ListPage() {
 
             <ul className="simple-list">
                 {items.map((entry) => (
-                    <li key={entry.id}>{entry.name}</li>
+                    <li key={entry.id}>
+                        {entry.name} {entry.quantity ? `x${entry.quantity}` : ""}
+                    </li>
                 ))}
             </ul>
+
+            {error && <p className="error-text">{error}</p>}
         </section>
     );
 }
