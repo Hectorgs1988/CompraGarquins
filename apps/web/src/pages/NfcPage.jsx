@@ -52,6 +52,9 @@ function NfcPage() {
                 method: "POST"
             });
             setConsumed(data.item);
+            window.dispatchEvent(new CustomEvent("cesta:list-updated", {
+                detail: data.item
+            }));
         } catch (error) {
             if (error.status === 401) {
                 setConsumeError("Necesitas iniciar sesion para consumir la etiqueta.");

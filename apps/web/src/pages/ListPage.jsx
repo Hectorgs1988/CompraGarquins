@@ -6,37 +6,49 @@ function ListPage() {
     const [items, setItems] = useState([]);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        let mounted = true;
-
-        async function loadItems() {
-            try {
-                setError("");
-                const data = await apiRequest("/list");
-                if (mounted) {
-                    setItems(data.items || []);
-                }
-            } catch (requestError) {
-                if (mounted) {
-                    setError(requestError.message);
-                }
-            }
+    async function loadItems() {
+        try {
+            setError("");
+            const data = await apiRequest("/list");
+            setItems(data.items || []);
+        } catch (requestError) {
+            setError(requestError.message);
         }
+    }
 
+    useEffect(() => {
         loadItems();
 
+        const handleListUpdated = () => {
+            loadItems();
+        };
+
+        window.addEventListener("cesta:list-updated", handleListUpdated);
+
         return () => {
-            mounted = false;
+            window.removeEventListener("cesta:list-updated", handleListUpdated);
         };
     }, []);
 
-    function addItem(event) {
+    async function addItem(event) {
         event.preventDefault();
-        if (!item.trim()) {
+        const nextItem = item.trim();
+        if (!nextItem) {
             return;
         }
-        setItems((prev) => [...prev, { id: crypto.randomUUID(), name: item.trim() }]);
-        setItem("");
+
+        try {
+            setError("");
+            await apiRequest("/list", {
+                method: "POST",
+                body: JSON.stringify({ name: nextItem, quantity: 1 })
+            });
+            setItem("");
+            await loadItems();
+            window.dispatchEvent(new CustomEvent("cesta:list-updated"));
+        } catch (requestError) {
+            setError(requestError.message);
+        }
     }
 
     return (
