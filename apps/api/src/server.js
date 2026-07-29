@@ -1,10 +1,10 @@
-import app from "./app.js";
 import { env } from "./config/env.js";
 import { bootstrapDb } from "./db/bootstrap.js";
 
 async function start() {
     try {
         await bootstrapDb();
+        const { default: app } = await import("./app.js");
         app.listen(env.port, () => {
             console.log(`API listening on http://localhost:${env.port}`);
         });
