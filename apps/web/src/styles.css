@@ -1,126 +1,126 @@
 :root {
-  --bg-1: #f0fdf4;
-  --bg-2: #ecfeff;
-  --surface: rgba(255, 255, 255, 0.85);
-  --ink: #12313c;
-  --brand: #0f766e;
-  --brand-strong: #115e59;
-  --ring: rgba(15, 118, 110, 0.25);
+    --bg-1: #f0fdf4;
+    --bg-2: #ecfeff;
+    --surface: rgba(255, 255, 255, 0.85);
+    --ink: #12313c;
+    --brand: #0f766e;
+    --brand-strong: #115e59;
+    --ring: rgba(15, 118, 110, 0.25);
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
-  color: var(--ink);
-  background: radial-gradient(circle at 15% 10%, var(--bg-1), transparent 45%),
-    radial-gradient(circle at 85% 15%, #d1fae5, transparent 40%),
-    linear-gradient(155deg, var(--bg-2), #fef3c7);
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Avenir Next", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: radial-gradient(circle at 15% 10%, var(--bg-1), transparent 45%),
+        radial-gradient(circle at 85% 15%, #d1fae5, transparent 40%),
+        linear-gradient(155deg, var(--bg-2), #fef3c7);
 }
 
 .app-shell {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .topbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
 }
 
 .topbar nav {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 .topbar a {
-  text-decoration: none;
-  color: var(--brand-strong);
-  font-weight: 600;
-  padding: 8px 12px;
-  border-radius: 999px;
+    text-decoration: none;
+    color: var(--brand-strong);
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 999px;
 }
 
 .topbar a.active {
-  background: var(--surface);
-  box-shadow: 0 0 0 1px var(--ring);
+    background: var(--surface);
+    box-shadow: 0 0 0 1px var(--ring);
 }
 
 .card-grid {
-  margin-top: 24px;
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-top: 24px;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .panel {
-  margin-top: 20px;
-  background: var(--surface);
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 20px;
-  backdrop-filter: blur(4px);
+    margin-top: 20px;
+    background: var(--surface);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 20px;
+    backdrop-filter: blur(4px);
 }
 
 .inline-form {
-  display: flex;
-  gap: 10px;
-  margin: 16px 0;
+    display: flex;
+    gap: 10px;
+    margin: 16px 0;
 }
 
 input,
 button,
 .btn {
-  border-radius: 10px;
-  font-size: 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
 }
 
 input {
-  flex: 1;
-  border: 1px solid #cbd5e1;
-  padding: 10px 12px;
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    padding: 10px 12px;
 }
 
 input:focus {
-  outline: 2px solid var(--ring);
-  border-color: var(--brand);
+    outline: 2px solid var(--ring);
+    border-color: var(--brand);
 }
 
 button,
 .btn {
-  border: none;
-  background: var(--brand);
-  color: white;
-  padding: 10px 14px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
+    border: none;
+    background: var(--brand);
+    color: white;
+    padding: 10px 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
 }
 
 button:hover,
 .btn:hover {
-  background: var(--brand-strong);
+    background: var(--brand-strong);
 }
 
 .simple-list {
-  margin: 0;
-  padding-left: 20px;
+    margin: 0;
+    padding-left: 20px;
 }
 
 @media (max-width: 700px) {
-  .app-shell {
-    padding: 14px;
-  }
+    .app-shell {
+        padding: 14px;
+    }
 
-  .inline-form {
-    flex-direction: column;
-  }
+    .inline-form {
+        flex-direction: column;
+    }
 }
