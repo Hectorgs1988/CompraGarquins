@@ -8,17 +8,24 @@ function App() {
     return (
         <div className="app-shell">
             <header className="topbar">
-                <h1>CestaGarquins</h1>
-                <nav>
-                    <NavLink to="/" end>
+                <div className="brand-block">
+                    <h1>CestaGarquins</h1>
+                    <p>Lista inteligente para compra diaria</p>
+                </div>
+                <nav className="top-nav">
+                    <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "") }>
                         Inicio
                     </NavLink>
-                    <NavLink to="/lista">Lista</NavLink>
-                    <NavLink to="/recetas">Recetas</NavLink>
+                    <NavLink to="/lista" className={({ isActive }) => (isActive ? "active" : "") }>
+                        Lista
+                    </NavLink>
+                    <NavLink to="/recetas" className={({ isActive }) => (isActive ? "active" : "") }>
+                        Recetas
+                    </NavLink>
                 </nav>
             </header>
 
-            <main>
+            <main className="app-main">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/lista" element={<ListPage />} />
@@ -26,6 +33,18 @@ function App() {
                     <Route path="/nfc/:slug" element={<NfcPage />} />
                 </Routes>
             </main>
+
+            <nav className="bottom-nav" aria-label="Navegación principal">
+                <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "") }>
+                    Inicio
+                </NavLink>
+                <NavLink to="/lista" className={({ isActive }) => (isActive ? "active" : "") }>
+                    Lista
+                </NavLink>
+                <NavLink to="/recetas" className={({ isActive }) => (isActive ? "active" : "") }>
+                    Recetas
+                </NavLink>
+            </nav>
         </div>
     );
 }
