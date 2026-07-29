@@ -9,7 +9,7 @@ function App() {
         <div className="app-shell">
             <header className="topbar">
                 <div className="brand-block">
-                    <h1>CestaGarquins</h1>
+                    <h1>Cesta Garquins</h1>
                     <p>Lista inteligente para compra diaria</p>
                 </div>
                 <nav className="top-nav">

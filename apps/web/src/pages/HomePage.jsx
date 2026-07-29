@@ -5,8 +5,7 @@ function HomePage() {
         <section className="card-grid card-grid--home">
             <article className="panel panel--home-hero">
                 <div>
-                    <p className="eyebrow">Compra rápida</p>
-                    <h2>Todo preparado para usar desde el móvil</h2>
+                    <h2>Lista de la compra</h2>
                     <p>
                         Añade productos, pasa los que coges a la cesta y finaliza la compra en un toque.
                     </p>
@@ -17,19 +16,9 @@ function HomePage() {
             </article>
 
             <article className="panel">
-                <h3>NFC</h3>
-                <p>
-                    Escanea tags NFC para añadir productos directamente a la lista sin escribir.
-                </p>
-                <Link to="/lista" className="btn btn--secondary">
-                    Ir a NFC
-                </Link>
-            </article>
-
-            <article className="panel">
-                <h3>Recetas</h3>
+                <h2>Recetas</h2>
                 <p>Guarda y organiza tus recetas para reutilizar ingredientes.</p>
-                <Link to="/recetas" className="btn btn--secondary">
+                <Link to="/recetas" className="btn btn--secondary btn--wide">
                     Ver recetas
                 </Link>
             </article>
