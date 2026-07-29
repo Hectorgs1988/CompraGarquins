@@ -47,16 +47,29 @@ body {
     padding: 10px 0 12px;
 }
 
+.brand-block {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(236, 253, 245, 0.78));
+    border: 1px solid rgba(15, 118, 110, 0.14);
+}
+
 .brand-block h1 {
     margin: 0;
-    font-size: clamp(1.45rem, 5vw, 2rem);
-    letter-spacing: -0.03em;
+    font-size: clamp(1.9rem, 7vw, 2.65rem);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    font-weight: 900;
+    color: #0b3f4f;
 }
 
 .brand-block p {
-    margin: 4px 0 0;
+    margin: 2px 0 0;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 .top-nav {
@@ -417,6 +430,19 @@ button:hover,
 
     .top-nav {
         display: none;
+    }
+
+    .topbar {
+        padding: 6px 0 8px;
+    }
+
+    .brand-block {
+        width: 100%;
+        padding: 10px 12px;
+    }
+
+    .brand-block h1 {
+        font-size: clamp(2rem, 8.5vw, 2.4rem);
     }
 
     .bottom-nav {
