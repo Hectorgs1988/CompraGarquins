@@ -15,6 +15,20 @@ Estructura base para una app de lista de la compra inteligente con NFC y recetas
 - `apps/web`: cliente React (PWA)
 - `apps/api`: API Express
 
+## Flujo de ramas
+
+- `main`: produccion
+- `develop`: integracion de desarrollo
+- `feature/*`: nuevas funcionalidades (desde `develop`)
+- `bugfix/*`: correcciones no criticas (desde `develop`)
+- `hotfix/*`: correcciones urgentes de produccion (desde `main`)
+
+Comandos de ejemplo:
+
+- Crear feature: `git checkout develop && git pull && git checkout -b feature/nombre-corto`
+- Crear bugfix: `git checkout develop && git pull && git checkout -b bugfix/nombre-corto`
+- Crear hotfix: `git checkout main && git pull && git checkout -b hotfix/nombre-corto`
+
 ## Arranque rapido
 
 1. Instala dependencias:

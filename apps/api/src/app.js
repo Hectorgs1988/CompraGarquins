@@ -11,17 +11,17 @@ import nfcRoutes from "./routes/nfc.routes.js";
 const app = express();
 
 app.use(
-  cors({
-    origin: env.corsOrigin,
-    credentials: true
-  })
+    cors({
+        origin: env.corsOrigin,
+        credentials: true
+    })
 );
 app.use(helmet());
 app.use(express.json());
 app.use(sessionMiddleware);
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, service: "api" });
+    res.json({ ok: true, service: "api" });
 });
 
 app.use("/auth", authRoutes);
