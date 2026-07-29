@@ -1,0 +1,21 @@
+{
+  "name": "@cestagarquins/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "connect-session-knex": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "knex": "^3.1.0",
+    "mysql2": "^3.11.4",
+    "pg": "^8.13.1"
+  }
+}
