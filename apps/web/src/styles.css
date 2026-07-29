@@ -115,6 +115,16 @@ button:hover,
     padding-left: 20px;
 }
 
+.error-text {
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+.success-text {
+    color: #166534;
+    font-weight: 600;
+}
+
 @media (max-width: 700px) {
     .app-shell {
         padding: 14px;
