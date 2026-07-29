@@ -503,22 +503,51 @@ button:hover,
 
     .item-row {
         grid-template-columns: auto minmax(0, 1fr);
+        gap: 8px 10px;
+        padding: 12px;
     }
 
     .quantity-controls {
-        grid-column: 1 / -1;
-        width: 100%;
-        justify-content: space-between;
+        grid-column: 2;
+        width: auto;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 2px;
     }
 
     .quantity-input {
-        width: 100%;
-        max-width: 96px;
+        width: 58px;
+        max-width: 58px;
+        min-height: 40px;
+        padding: 8px 6px;
+        border-radius: 12px;
     }
 
     .item-row .secondary-button {
-        grid-column: 1 / -1;
-        justify-self: stretch;
+        grid-column: 2;
+        justify-self: end;
+        width: auto;
+        min-height: 40px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 0.93rem;
+        margin-top: 2px;
+    }
+
+    .item-row .icon-button {
+        min-height: 40px;
+        min-width: 34px;
+        padding: 6px 10px;
+        border-radius: 12px;
+        font-size: 1.05rem;
+    }
+
+    .quantity-input--form {
+        width: 72px;
+        min-height: 42px;
+        flex: 0 0 auto;
+        padding: 6px 8px;
+        align-self: flex-start;
     }
 
     .card-grid--home .panel {
