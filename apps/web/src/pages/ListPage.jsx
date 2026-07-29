@@ -1,16 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { apiRequest } from "../lib/api";
 
 function ListPage() {
     const [item, setItem] = useState("");
     const [items, setItems] = useState([]);
+    const [error, setError] = useState("");
 
-    function addItem(event) {
+    async function loadItems() {
+        try {
+            setError("");
+            const data = await apiRequest("/list");
+            setItems(data.items || []);
+        } catch (requestError) {
+            setError(requestError.message);
+        }
+    }
+
+    useEffect(() => {
+        loadItems();
+
+        const handleListUpdated = () => {
+            loadItems();
+        };
+
+        window.addEventListener("cesta:list-updated", handleListUpdated);
+
+        return () => {
+            window.removeEventListener("cesta:list-updated", handleListUpdated);
+        };
+    }, []);
+
+    async function addItem(event) {
         event.preventDefault();
-        if (!item.trim()) {
+        const nextItem = item.trim();
+        if (!nextItem) {
             return;
         }
-        setItems((prev) => [...prev, { id: crypto.randomUUID(), name: item.trim() }]);
-        setItem("");
+
+        try {
+            setError("");
+            await apiRequest("/list", {
+                method: "POST",
+                body: JSON.stringify({ name: nextItem, quantity: 1 })
+            });
+            setItem("");
+            await loadItems();
+            window.dispatchEvent(new CustomEvent("cesta:list-updated"));
+        } catch (requestError) {
+            setError(requestError.message);
+        }
     }
 
     return (
@@ -28,9 +66,13 @@ function ListPage() {
 
             <ul className="simple-list">
                 {items.map((entry) => (
-                    <li key={entry.id}>{entry.name}</li>
+                    <li key={entry.id}>
+                        {entry.name} {entry.quantity ? `x${entry.quantity}` : ""}
+                    </li>
                 ))}
             </ul>
+
+            {error && <p className="error-text">{error}</p>}
         </section>
     );
 }

@@ -10,10 +10,8 @@ export async function login(req, res) {
     let user = await db("users").where({ email }).first();
 
     if (!user) {
-        const [created] = await db("users")
-            .insert({ email, name })
-            .returning(["id", "email", "name"]);
-        user = created;
+        await db("users").insert({ email, name });
+        user = await db("users").where({ email }).first();
     }
 
     req.session.user = {
