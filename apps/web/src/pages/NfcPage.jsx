@@ -67,27 +67,23 @@ function NfcPage() {
     }
 
     return (
-        <section className="panel">
-            <h2>Entrada NFC detectada</h2>
+        <section className="panel panel--nfc">
+            <p className="eyebrow">NFC detectado</p>
+            <h2>{tag ? tag.itemName : "Preparando producto"}</h2>
 
-            {!loadError && (
-                <p>
-                    Token NFC detectado: <strong>{decoded}</strong>
-                </p>
-            )}
+            {!loadError && <p className="section-subtitle">Token: {decoded}</p>}
 
             {tag && (
                 <p>
-                    Esta etiqueta esta asociada a <strong>{tag.itemName}</strong> x
-                    {tag.quantity}.
+                    Esta pegatina añade <strong>{tag.quantity} {tag.itemName}</strong> a tu lista.
                 </p>
             )}
 
             {loadError && <p className="error-text">{loadError}</p>}
 
             {tag && (
-                <button type="button" onClick={handleConsume} disabled={consuming}>
-                    {consuming ? "Consumiendo..." : "Anadir a la lista"}
+                <button type="button" className="btn btn--wide" onClick={handleConsume} disabled={consuming}>
+                    {consuming ? "Añadiendo..." : "Añadir a la lista"}
                 </button>
             )}
 
@@ -99,7 +95,7 @@ function NfcPage() {
                 </p>
             )}
 
-            <Link to="/lista" className="btn">
+            <Link to="/lista" className="btn btn--secondary btn--wide">
                 Ir a la lista
             </Link>
         </section>

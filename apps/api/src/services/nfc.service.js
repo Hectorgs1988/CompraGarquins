@@ -30,6 +30,7 @@ export async function consumeNfcTag({ token, userId }) {
     const [itemId] = await db("shopping_list_items").insert({
         name: tag.item_name,
         quantity: tag.quantity,
+        status: "list",
         source: "nfc",
         added_by_user_id: userId,
         created_at: db.fn.now()
