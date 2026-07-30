@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 4100
 
-CMD ["sh", "-c", "npm run dev -w apps/api"]
+CMD ["sh", "-c", "npm run start -w apps/api"]
