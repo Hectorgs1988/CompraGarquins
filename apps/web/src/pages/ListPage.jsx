@@ -280,11 +280,18 @@ function ListPage() {
                     {listItems.length ? (
                         <ul className="item-list">
                             {listItems.map((entry) => (
-                                <li key={entry.id} className="item-row">
+                                <li
+                                    key={entry.id}
+                                    className={`item-row ${entry.source === "recipe" ? "item-row--recipe" : ""}`}
+                                >
                                     <span className="item-bullet" />
                                     <div className="item-main">
                                         <strong>{entry.name}</strong>
-                                        <span className="item-meta">Origen: {entry.source}</span>
+                                        <span className="item-meta">
+                                            {entry.source === "recipe"
+                                                ? `Origen: receta${entry.recipe_group ? ` · ${entry.recipe_group}` : ""}`
+                                                : `Origen: ${entry.source || "manual"}`}
+                                        </span>
                                     </div>
                                     {renderQuantityControls(entry)}
                                     <button

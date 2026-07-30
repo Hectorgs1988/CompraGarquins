@@ -28,6 +28,7 @@ export async function bootstrapDb() {
             table.integer("quantity").notNullable().defaultTo(1);
             table.string("status").notNullable().defaultTo("list");
             table.string("source").notNullable().defaultTo("manual");
+            table.string("recipe_group").nullable();
             table.integer("added_by_user_id").unsigned().nullable();
             table.timestamp("created_at").defaultTo(db.fn.now());
         });
@@ -41,6 +42,13 @@ export async function bootstrapDb() {
             await db("shopping_list_items")
                 .whereNull("status")
                 .update({ status: "list" });
+        }
+
+        const hasRecipeGroupColumn = await db.schema.hasColumn("shopping_list_items", "recipe_group");
+        if (!hasRecipeGroupColumn) {
+            await db.schema.alterTable("shopping_list_items", (table) => {
+                table.string("recipe_group").nullable();
+            });
         }
     }
 

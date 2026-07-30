@@ -4,7 +4,7 @@ import { db } from "../db/knex.js";
 const router = Router();
 
 function selectListColumns() {
-    return ["id", "name", "quantity", "status", "source", "created_at"];
+    return ["id", "name", "quantity", "status", "source", "recipe_group", "created_at"];
 }
 
 router.get("/", async (_req, res) => {
@@ -18,6 +18,9 @@ router.get("/", async (_req, res) => {
 router.post("/", async (req, res) => {
     const name = String(req.body?.name || "").trim();
     const quantity = Number(req.body?.quantity || 1);
+    const incomingSource = String(req.body?.source || "manual").trim().toLowerCase();
+    const source = ["manual", "nfc", "recipe"].includes(incomingSource) ? incomingSource : "manual";
+    const recipeGroup = source === "recipe" ? String(req.body?.recipeGroup || "").trim() : "";
 
     if (!name) {
         return res.status(400).json({ error: "name is required" });
@@ -28,7 +31,8 @@ router.post("/", async (req, res) => {
         name,
         quantity: safeQuantity,
         status: "list",
-        source: "manual",
+        source,
+        recipe_group: recipeGroup || null,
         added_by_user_id: req.session?.user?.id ?? null,
         created_at: db.fn.now()
     });
