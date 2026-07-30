@@ -1,76 +1,134 @@
 # CestaGarquins (PWA)
 
-Estructura base para una app de lista de la compra inteligente con NFC y recetas.
+Aplicacion web para gestionar lista de la compra con soporte NFC y seccion de recetas.
+
+## Estado actual
+
+- Lista de la compra:
+  - Alta manual de productos con cantidad.
+  - Edicion de cantidad desde la propia lista.
+  - Si una cantidad llega a 0 al disminuir, se solicita confirmacion y se elimina el producto.
+  - Movimiento de productos entre lista y cesta.
+  - Finalizacion de compra (elimina lo que esta en cesta).
+- Recetas:
+  - Consulta de recetas.
+  - Alta de receta con nombre, descripcion, ingredientes y pasos.
+  - Vista de detalle al abrir una receta.
+  - Accion para anadir ingredientes de una receta a la lista como items individuales.
+  - Los ingredientes anadidos desde receta quedan identificados como grupo por nombre de receta.
+- NFC:
+  - Lectura de tag por token.
+  - Consumo de tag para anadir a lista (requiere sesion autenticada).
 
 ## Stack
 
 - Frontend: React + Vite + PWA
-- Backend: Node + Express
-- DB: PostgreSQL o MySQL (via Knex)
-- Autenticacion: sesiones persistentes (express-session + connect-session-knex)
-- NFC: enlaces NDEF (tags que abren URLs de la app)
+- Backend: Node.js + Express
+- DB soportada por Knex: sqlite3 (por defecto), mysql2, postgres
+- Sesiones: express-session + connect-session-knex
 
 ## Estructura
 
-- `apps/web`: cliente React (PWA)
-- `apps/api`: API Express
+- apps/web: cliente React
+- apps/api: API Express
+- docker-compose.yml: entorno Docker (MySQL + API + Web + Adminer)
 
-## Flujo de ramas
+## Scripts del monorepo
 
-- `main`: produccion
-- `develop`: integracion de desarrollo
-- `feature/*`: nuevas funcionalidades (desde `develop`)
-- `bugfix/*`: correcciones no criticas (desde `develop`)
-- `hotfix/*`: correcciones urgentes de produccion (desde `main`)
+Desde la raiz:
 
-Comandos de ejemplo:
+- npm run dev: levanta web + api en paralelo.
+- npm run dev:mobile: levanta web en host 0.0.0.0 + api para pruebas en movil.
+- npm run dev:web: solo frontend.
+- npm run dev:api: solo backend.
+- npm run build: build del frontend.
+- npm run lint: lint del frontend.
 
-- Crear feature: `git checkout develop && git pull && git checkout -b feature/nombre-corto`
-- Crear bugfix: `git checkout develop && git pull && git checkout -b bugfix/nombre-corto`
-- Crear hotfix: `git checkout main && git pull && git checkout -b hotfix/nombre-corto`
-
-## Arranque rapido
+## Configuracion de entorno
 
 1. Instala dependencias:
-   - `npm install`
-2. Duplica variables:
-   - `cp .env.example .env`
-3. Levanta una base de datos (elige una):
-   - PostgreSQL: `docker compose --profile postgres up -d`
-   - MySQL: `docker compose --profile mysql up -d`
-   - Si el 3306 esta ocupado: `MYSQL_HOST_PORT=3307 docker compose --profile mysql up -d`
-4. Ajusta `DB_CLIENT` y credenciales en `.env` (`postgres` o `mysql2`).
-5. Inicia en desarrollo:
-   - `npm run dev`
-   - Para pruebas en movil (misma Wi-Fi): `npm run dev:mobile`
+   - npm install
+2. Crea tu .env desde el ejemplo:
+   - cp .env.example .env
 
-Frontend: http://localhost:5174
-Backend: http://localhost:4100
+Variables importantes en .env:
 
-## Pruebas En Movil
+- DB_CLIENT: sqlite3 (por defecto), mysql2 o postgres.
+- Para sqlite3:
+  - DB_FILE define la ruta del fichero (por defecto ./data/cestagarquins.sqlite3).
+- Para mysql2/postgres:
+  - DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME.
 
-1. Arranca con `npm run dev:mobile`.
-2. Busca la IP local de tu Mac (por ejemplo `192.168.1.34`).
-3. Abre en el movil: `http://TU_IP:5174`.
+## Arranque rapido (opcion recomendada local)
+
+### Opcion A: sqlite3 (sin Docker)
+
+1. Revisa DB_CLIENT=sqlite3 en .env.
+2. Ejecuta:
+   - npm run dev
+
+Servicios:
+
+- Frontend: http://localhost:5174
+- API: http://localhost:4100
+
+### Opcion B: Docker con MySQL
+
+1. Revisa DB_CLIENT=mysql2 en .env (si quieres conectar tu API local al MySQL del compose).
+2. Levanta contenedores:
+   - docker compose up -d
+3. Si quieres desarrollo local con hot reload, puedes ejecutar web/api fuera de Docker con npm run dev y apuntar al MySQL del compose.
+
+Puertos por defecto del compose:
+
+- Web: 5174
+- API: 4100
+- MySQL: 3307 (host) -> 3306 (contenedor)
+- Adminer: 8081
+
+## Pruebas en movil
+
+1. Arranca con npm run dev:mobile.
+2. Localiza tu IP local en la misma red Wi-Fi.
+3. Abre en el movil: http://TU_IP:5174
 
 Notas:
 
-- El frontend usa `--host 0.0.0.0` para exponer Vite en LAN.
-- Si no defines `VITE_API_URL`, el frontend usa automaticamente `http://<mismo-host>:4100`.
-- En desarrollo, la API acepta origenes LAN privados para simplificar pruebas.
+- Si VITE_API_URL no esta definido, el frontend usa automaticamente http://<mismo-host>:4100.
+- En desarrollo, la API permite origenes LAN privadas ademas de CORS_ORIGIN.
 
-## Flujo NFC (NDEF)
+## Endpoints principales
 
-La idea base es grabar tags NFC con una URL de la app, por ejemplo:
+- GET /health
+- Auth:
+  - POST /auth/login
+  - POST /auth/logout
+  - GET /auth/me
+- Lista:
+  - GET /list
+  - POST /list
+  - PATCH /list/:id
+  - DELETE /list/:id
+  - POST /list/:id/cart
+  - POST /list/:id/restore
+  - POST /list/finalize
+- Recetas:
+  - GET /recipes
+  - POST /recipes
+- NFC:
+  - GET /nfc/:token
+  - POST /nfc/:token/consume (requiere auth)
 
-- `https://tu-dominio.app/nfc/f8f3a72d19c`
+## Notas funcionales importantes
 
-Al abrirla, el frontend consulta `GET /nfc/:token` y solo cuando pulsas el boton
-de accion ejecuta `POST /nfc/:token/consume` para anadir a la lista.
+- Las recetas se almacenan actualmente en memoria en la API (no persistentes tras reinicio).
+- La lista de la compra si se persiste en base de datos.
+- Los ingredientes anadidos desde una receta se guardan como source=recipe y con recipe_group para distinguir su grupo.
 
-## Proximos pasos
+## Flujo de ramas (propuesto)
 
-- Modelo de datos real (usuarios, items, listas, recetas)
-- Login/register + logout
-- CRUD de lista y recetas
-- Resolucion NFC -> item
+- main: produccion
+- develop: integracion
+- feature/*: nuevas funcionalidades
+- bugfix/*: correcciones no criticas
+- hotfix/*: correcciones urgentes
