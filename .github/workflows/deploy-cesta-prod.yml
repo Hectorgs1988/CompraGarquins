@@ -13,7 +13,7 @@ concurrency:
 jobs:
   deploy:
     name: Deploy backend to cesta-prod
-    runs-on: [self-hosted, Linux, X64, rural-prod-deploy]
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
       - name: Checkout repository
