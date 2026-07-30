@@ -26,10 +26,22 @@ export async function bootstrapDb() {
             table.increments("id").primary();
             table.string("name").notNullable();
             table.integer("quantity").notNullable().defaultTo(1);
+            table.string("status").notNullable().defaultTo("list");
             table.string("source").notNullable().defaultTo("manual");
             table.integer("added_by_user_id").unsigned().nullable();
             table.timestamp("created_at").defaultTo(db.fn.now());
         });
+    } else {
+        const hasStatusColumn = await db.schema.hasColumn("shopping_list_items", "status");
+        if (!hasStatusColumn) {
+            await db.schema.alterTable("shopping_list_items", (table) => {
+                table.string("status").notNullable().defaultTo("list");
+            });
+
+            await db("shopping_list_items")
+                .whereNull("status")
+                .update({ status: "list" });
+        }
     }
 
     const hasNfcTags = await db.schema.hasTable("nfc_tags");

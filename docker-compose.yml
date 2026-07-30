@@ -44,7 +44,7 @@ services:
       dockerfile: apps/web/Dockerfile
     container_name: cesta-web
     environment:
-      VITE_API_URL: http://localhost:${API_HOST_PORT:-4100}
+      VITE_API_URL: ""
     ports:
       - "${WEB_HOST_PORT:-5174}:5174"
     depends_on:
