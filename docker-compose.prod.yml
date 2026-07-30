@@ -1,0 +1,48 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: cesta-db-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data_prod:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: cesta-api-prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4100
+      DB_CLIENT: mysql2
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      SESSION_SECRET: ${SESSION_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      SESSION_COOKIE_SAME_SITE: ${SESSION_COOKIE_SAME_SITE:-none}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN:-}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+    ports:
+      - "${API_HOST_PORT:-4100}:4100"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data_prod:
