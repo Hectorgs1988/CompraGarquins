@@ -80,6 +80,23 @@ router.patch("/:id", async (req, res) => {
     return res.json({ item });
 });
 
+router.delete("/:id", async (req, res) => {
+    const itemId = Number(req.params.id);
+    const existingItem = await db("shopping_list_items").where({ id: itemId }).first();
+
+    if (!existingItem) {
+        return res.status(404).json({ error: "Item not found" });
+    }
+
+    if (existingItem.status !== "list") {
+        return res.status(409).json({ error: "Only list items can be deleted" });
+    }
+
+    await db("shopping_list_items").where({ id: itemId }).del();
+
+    return res.json({ ok: true, deletedItemId: itemId });
+});
+
 router.post("/:id/cart", async (req, res) => {
     const itemId = Number(req.params.id);
     const existingItem = await db("shopping_list_items").where({ id: itemId }).first();

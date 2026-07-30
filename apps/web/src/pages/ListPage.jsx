@@ -83,10 +83,40 @@ function ListPage() {
         }
     }
 
+    async function deleteItem(itemId, itemName) {
+        const confirmed = window.confirm(
+            `¿Seguro que quieres eliminar "${itemName}" de la lista?`
+        );
+
+        if (!confirmed) {
+            return false;
+        }
+
+        try {
+            setSavingItemId(itemId);
+            setError("");
+            await apiRequest(`/list/${itemId}`, { method: "DELETE" });
+            await loadItems();
+            window.dispatchEvent(new CustomEvent("cesta:list-updated"));
+            return true;
+        } catch (requestError) {
+            setError(requestError.message);
+            return false;
+        } finally {
+            setSavingItemId(null);
+        }
+    }
+
     async function updateQuantity(itemId) {
         const nextQuantity = Number(quantityDrafts[itemId]);
 
-        if (!Number.isFinite(nextQuantity) || nextQuantity < 1) {
+        if (!Number.isFinite(nextQuantity)) {
+            return;
+        }
+
+        if (nextQuantity <= 0) {
+            const entry = items.find((currentItem) => currentItem.id === itemId);
+            await deleteItem(itemId, entry?.name || "este producto");
             return;
         }
 
@@ -155,10 +185,18 @@ function ListPage() {
                 <button
                     type="button"
                     className="icon-button"
-                    onClick={() => {
-                        const nextQuantity = Math.max(1, Number(draftQuantity) - 1);
+                    onClick={async () => {
+                        const currentQuantity = Number(draftQuantity);
+
+                        if (currentQuantity <= 1) {
+                            await deleteItem(entry.id, entry.name);
+                            return;
+                        }
+
+                        const nextQuantity = currentQuantity - 1;
                         setQuantityDrafts((current) => ({ ...current, [entry.id]: nextQuantity }));
                     }}
+                    disabled={savingItemId === entry.id}
                 >
                     -
                 </button>
@@ -185,6 +223,7 @@ function ListPage() {
                         const nextQuantity = Number(draftQuantity) + 1;
                         setQuantityDrafts((current) => ({ ...current, [entry.id]: nextQuantity }));
                     }}
+                    disabled={savingItemId === entry.id}
                 >
                     +
                 </button>
