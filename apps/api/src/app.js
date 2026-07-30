@@ -10,6 +10,10 @@ import nfcRoutes from "./routes/nfc.routes.js";
 
 const app = express();
 
+if (env.trustProxy) {
+    app.set("trust proxy", env.trustProxyHops);
+}
+
 function isPrivateLanOrigin(origin) {
     return /^http:\/\/(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(origin);
 }
