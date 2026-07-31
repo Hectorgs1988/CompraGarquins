@@ -195,6 +195,10 @@ body {
     align-items: center;
 }
 
+.nfc-row-copy {
+    cursor: copy;
+}
+
 .panel--stacked {
     display: grid;
     gap: 12px;

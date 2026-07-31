@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../lib/api";
 
+const NFC_PUBLIC_BASE_URL = (
+    import.meta.env.VITE_NFC_PUBLIC_BASE_URL ||
+    "https://cesta-garquins.vercel.app"
+).replace(/\/$/, "");
+
 function NfcConfigPage() {
     const [tags, setTags] = useState([]);
     const [itemName, setItemName] = useState("");
@@ -121,6 +126,22 @@ function NfcConfigPage() {
         }
     }
 
+    function buildNfcUrl(tokenValue) {
+        return `${NFC_PUBLIC_BASE_URL}/nfc/${tokenValue}`;
+    }
+
+    async function copyTagUrl(tag) {
+        const url = buildNfcUrl(tag.token);
+
+        try {
+            await navigator.clipboard.writeText(url);
+            setSuccess(`URL copiada: ${url}`);
+            setError("");
+        } catch {
+            setError("No se pudo copiar la URL automaticamente.");
+        }
+    }
+
     async function deleteTag(tag) {
         const confirmed = window.confirm(
             `¿Seguro que quieres eliminar la pegatina ${tag.token} (${tag.itemName})?`
@@ -216,7 +237,24 @@ function NfcConfigPage() {
                             const isEditing = editingTagId === tag.id;
 
                             return (
-                                <li key={tag.id} className={`item-row ${tag.isActive ? "" : "item-row--muted"}`}>
+                                <li
+                                    key={tag.id}
+                                    className={`item-row nfc-row-copy ${tag.isActive ? "" : "item-row--muted"}`}
+                                    onClick={() => {
+                                        if (!isEditing) {
+                                            copyTagUrl(tag);
+                                        }
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if (!isEditing && (event.key === "Enter" || event.key === " ")) {
+                                            event.preventDefault();
+                                            copyTagUrl(tag);
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    title="Pulsa para copiar la URL NFC"
+                                >
                                     <span className={`item-bullet ${tag.isActive ? "" : "item-bullet--muted"}`} />
                                     <div className="item-main">
                                         <strong>{tag.token}</strong>
@@ -258,7 +296,10 @@ function NfcConfigPage() {
                                             <button
                                                 type="button"
                                                 className="secondary-button"
-                                                onClick={() => saveEditing(tag.id)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    saveEditing(tag.id);
+                                                }}
                                                 disabled={saving}
                                             >
                                                 Guardar
@@ -266,7 +307,10 @@ function NfcConfigPage() {
                                             <button
                                                 type="button"
                                                 className="icon-button"
-                                                onClick={cancelEditing}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    cancelEditing();
+                                                }}
                                                 disabled={saving || deletingTagId === tag.id}
                                             >
                                                 Cancelar
@@ -274,7 +318,10 @@ function NfcConfigPage() {
                                             <button
                                                 type="button"
                                                 className="secondary-button secondary-button--danger"
-                                                onClick={() => deleteTag(tag)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    deleteTag(tag);
+                                                }}
                                                 disabled={saving || deletingTagId === tag.id}
                                             >
                                                 {deletingTagId === tag.id ? "Eliminando..." : "Eliminar"}
@@ -285,7 +332,10 @@ function NfcConfigPage() {
                                             <button
                                                 type="button"
                                                 className="secondary-button"
-                                                onClick={() => startEditing(tag)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    startEditing(tag);
+                                                }}
                                                 disabled={deletingTagId === tag.id}
                                             >
                                                 Editar
@@ -293,7 +343,10 @@ function NfcConfigPage() {
                                             <button
                                                 type="button"
                                                 className="secondary-button secondary-button--danger"
-                                                onClick={() => deleteTag(tag)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    deleteTag(tag);
+                                                }}
                                                 disabled={deletingTagId === tag.id}
                                             >
                                                 {deletingTagId === tag.id ? "Eliminando..." : "Eliminar"}
