@@ -3,10 +3,6 @@ import { apiRequest } from "../lib/api";
 
 function NfcConfigPage() {
     const [tags, setTags] = useState([]);
-    const [needsAuth, setNeedsAuth] = useState(false);
-    const [loginEmail, setLoginEmail] = useState("");
-    const [loginName, setLoginName] = useState("");
-    const [loggingIn, setLoggingIn] = useState(false);
     const [token, setToken] = useState("");
     const [itemName, setItemName] = useState("");
     const [quantity, setQuantity] = useState(1);
@@ -30,13 +26,7 @@ function NfcConfigPage() {
             setError("");
             const data = await apiRequest("/nfc/tags");
             setTags(data.tags || []);
-            setNeedsAuth(false);
         } catch (requestError) {
-            if (requestError.status === 401) {
-                setError("Necesitas iniciar sesion para configurar las pegatinas NFC.");
-                setNeedsAuth(true);
-                return;
-            }
             setError(requestError.message);
         } finally {
             setLoading(false);
@@ -46,34 +36,6 @@ function NfcConfigPage() {
     useEffect(() => {
         loadTags();
     }, []);
-
-    async function handleLogin(event) {
-        event.preventDefault();
-        const email = loginEmail.trim().toLowerCase();
-        const name = loginName.trim();
-
-        if (!email || !name) {
-            setError("Introduce email y nombre para iniciar sesion.");
-            return;
-        }
-
-        try {
-            setLoggingIn(true);
-            setError("");
-            setSuccess("");
-            await apiRequest("/auth/login", {
-                method: "POST",
-                body: JSON.stringify({ email, name })
-            });
-            setNeedsAuth(false);
-            setSuccess("Sesion iniciada correctamente.");
-            await loadTags();
-        } catch (requestError) {
-            setError(requestError.message);
-        } finally {
-            setLoggingIn(false);
-        }
-    }
 
     async function handleCreateTag(event) {
         event.preventDefault();
@@ -186,48 +148,29 @@ function NfcConfigPage() {
                     </div>
                 </div>
 
-                {needsAuth ? (
-                    <form className="inline-form inline-form--nfc" onSubmit={handleLogin}>
-                        <input
-                            value={loginEmail}
-                            onChange={(event) => setLoginEmail(event.target.value)}
-                            placeholder="Email"
-                            type="email"
-                        />
-                        <input
-                            value={loginName}
-                            onChange={(event) => setLoginName(event.target.value)}
-                            placeholder="Nombre"
-                        />
-                        <button type="submit" className="secondary-button" disabled={loggingIn}>
-                            {loggingIn ? "Entrando..." : "Iniciar sesion"}
-                        </button>
-                    </form>
-                ) : (
-                    <form className="inline-form inline-form--nfc" onSubmit={handleCreateTag}>
-                        <input
-                            value={token}
-                            onChange={(event) => setToken(event.target.value)}
-                            placeholder="Token NFC"
-                        />
-                        <input
-                            value={itemName}
-                            onChange={(event) => setItemName(event.target.value)}
-                            placeholder="Producto"
-                        />
-                        <input
-                            className="quantity-input quantity-input--form"
-                            type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={(event) => setQuantity(event.target.value)}
-                            aria-label="Cantidad"
-                        />
-                        <button type="submit" className="secondary-button" disabled={saving}>
-                            {saving ? "Guardando..." : "Crear"}
-                        </button>
-                    </form>
-                )}
+                <form className="inline-form inline-form--nfc" onSubmit={handleCreateTag}>
+                    <input
+                        value={token}
+                        onChange={(event) => setToken(event.target.value)}
+                        placeholder="Token NFC"
+                    />
+                    <input
+                        value={itemName}
+                        onChange={(event) => setItemName(event.target.value)}
+                        placeholder="Producto"
+                    />
+                    <input
+                        className="quantity-input quantity-input--form"
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(event) => setQuantity(event.target.value)}
+                        aria-label="Cantidad"
+                    />
+                    <button type="submit" className="secondary-button" disabled={saving}>
+                        {saving ? "Guardando..." : "Crear"}
+                    </button>
+                </form>
 
                 {error && <p className="error-text">{error}</p>}
                 {success && <p className="success-text">{success}</p>}
@@ -242,9 +185,7 @@ function NfcConfigPage() {
                     <span className="count-pill">{tags.length}</span>
                 </div>
 
-                {needsAuth ? (
-                    <p className="empty-state">Inicia sesion para ver y editar tus pegatinas NFC.</p>
-                ) : loading ? (
+                {loading ? (
                     <p className="empty-state">Cargando pegatinas...</p>
                 ) : tags.length ? (
                     <ul className="item-list">
