@@ -22,6 +22,14 @@ function HomePage() {
                     Ver recetas
                 </Link>
             </article>
+
+            <article className="panel">
+                <h2>Pegatinas NFC</h2>
+                <p>Configura cada token NFC con un producto para anadirlo con un escaneo.</p>
+                <Link to="/nfc-config" className="btn btn--secondary btn--wide">
+                    Configurar NFC
+                </Link>
+            </article>
         </section>
     );
 }

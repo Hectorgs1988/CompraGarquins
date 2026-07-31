@@ -157,6 +157,44 @@ body {
     gap: 16px;
 }
 
+.nfc-config-page {
+    display: grid;
+    gap: 18px;
+}
+
+.inline-form--nfc {
+    align-items: center;
+}
+
+.item-row--muted {
+    opacity: 0.72;
+}
+
+.item-bullet--muted {
+    background: #94a3b8;
+}
+
+.nfc-edit-grid {
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) 76px auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.nfc-toggle {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.nfc-actions {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+}
+
 .panel--stacked {
     display: grid;
     gap: 12px;
@@ -586,6 +624,10 @@ button:hover,
         flex-direction: column;
     }
 
+    .inline-form--nfc {
+        align-items: stretch;
+    }
+
     .top-nav {
         display: none;
     }
@@ -648,6 +690,17 @@ button:hover,
         border-radius: 12px;
         font-size: 0.9rem;
         margin-top: 2px;
+    }
+
+    .nfc-edit-grid {
+        grid-column: 2;
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .nfc-actions {
+        grid-column: 2;
+        justify-self: end;
     }
 
     .item-row .icon-button {

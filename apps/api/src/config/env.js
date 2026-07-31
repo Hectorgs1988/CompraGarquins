@@ -55,6 +55,7 @@ export const env = {
     port: Number(process.env.PORT || 4000),
     corsOrigins,
     sessionSecret: process.env.SESSION_SECRET || "change-me",
+    sessionMaxAgeDays: Number(process.env.SESSION_MAX_AGE_DAYS || 180),
     sessionCookieSameSite,
     sessionCookieSecure,
     sessionCookieDomain: process.env.SESSION_COOKIE_DOMAIN || undefined,

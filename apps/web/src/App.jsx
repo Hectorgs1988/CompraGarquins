@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage";
 import ListPage from "./pages/ListPage";
 import RecipesPage from "./pages/RecipesPage";
 import NfcPage from "./pages/NfcPage";
+import NfcConfigPage from "./pages/NfcConfigPage";
 
 function App() {
     return (
@@ -22,6 +23,9 @@ function App() {
                     <NavLink to="/recetas" className={({ isActive }) => (isActive ? "active" : "") }>
                         Recetas
                     </NavLink>
+                    <NavLink to="/nfc-config" className={({ isActive }) => (isActive ? "active" : "") }>
+                        NFC
+                    </NavLink>
                 </nav>
             </header>
 
@@ -30,6 +34,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/lista" element={<ListPage />} />
                     <Route path="/recetas" element={<RecipesPage />} />
+                    <Route path="/nfc-config" element={<NfcConfigPage />} />
                     <Route path="/nfc/:slug" element={<NfcPage />} />
                 </Routes>
             </main>
@@ -71,6 +76,21 @@ function App() {
                         </svg>
                     </span>
                     <span className="bottom-nav__label">Recetas</span>
+                </NavLink>
+                <NavLink to="/nfc-config" className={({ isActive }) => (isActive ? "active" : "") }>
+                    <span className="bottom-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img">
+                            <path d="M12 2v4" />
+                            <path d="M12 18v4" />
+                            <path d="M4.9 4.9l2.8 2.8" />
+                            <path d="M16.3 16.3l2.8 2.8" />
+                            <path d="M2 12h4" />
+                            <path d="M18 12h4" />
+                            <path d="M4.9 19.1l2.8-2.8" />
+                            <path d="M16.3 7.7l2.8-2.8" />
+                        </svg>
+                    </span>
+                    <span className="bottom-nav__label">NFC</span>
                 </NavLink>
             </nav>
         </div>

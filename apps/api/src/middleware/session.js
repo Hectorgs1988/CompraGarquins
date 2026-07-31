@@ -10,13 +10,14 @@ export const sessionMiddleware = session({
     secret: env.sessionSecret,
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     proxy: env.trustProxy,
     cookie: {
         secure: env.sessionCookieSecure,
         httpOnly: true,
         sameSite: env.sessionCookieSameSite,
         domain: env.sessionCookieDomain,
-        maxAge: 1000 * 60 * 60 * 24 * 14
+        maxAge: 1000 * 60 * 60 * 24 * env.sessionMaxAgeDays
     },
     store: new ConnectSessionKnexStore({
         knex: db,
