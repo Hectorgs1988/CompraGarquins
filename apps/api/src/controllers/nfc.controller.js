@@ -1,10 +1,20 @@
 import {
     consumeNfcTag,
     createNfcTag,
+    deleteNfcTagById,
     getNfcTagByToken,
     listNfcTags,
     updateNfcTagById
 } from "../services/nfc.service.js";
+import { randomBytes } from "crypto";
+
+function generateToken() {
+    return `nfc-${randomBytes(5).toString("hex")}`;
+}
+
+function isDuplicateTokenError(error) {
+    return error?.code === "SQLITE_CONSTRAINT" || error?.code === "ER_DUP_ENTRY";
+}
 
 function parseQuantity(value) {
     const parsed = Number(value);
@@ -33,25 +43,37 @@ export async function getNfcTags(_req, res) {
 }
 
 export async function createTag(req, res) {
-    const token = String(req.body?.token || "").trim();
+    const providedToken = String(req.body?.token || "").trim();
     const itemName = String(req.body?.itemName || "").trim();
     const quantity = parseQuantity(req.body?.quantity);
     const isActive = parseIsActive(req.body?.isActive);
 
-    if (!token || !itemName || !quantity) {
-        return res.status(400).json({ error: "token, itemName and quantity are required" });
+    if (!itemName || !quantity) {
+        return res.status(400).json({ error: "itemName and quantity are required" });
     }
 
-    try {
-        const tag = await createNfcTag({ token, itemName, quantity, isActive: isActive ?? true });
-        return res.status(201).json({ tag });
-    } catch (error) {
-        if (error?.code === "SQLITE_CONSTRAINT" || error?.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({ error: "Token already exists" });
+    let attempts = 0;
+    let token = providedToken || generateToken();
+
+    while (attempts < 6) {
+        try {
+            const tag = await createNfcTag({ token, itemName, quantity, isActive: isActive ?? true });
+            return res.status(201).json({ tag });
+        } catch (error) {
+            if (!isDuplicateTokenError(error)) {
+                throw error;
+            }
+
+            if (providedToken) {
+                return res.status(409).json({ error: "Token already exists" });
+            }
+
+            attempts += 1;
+            token = generateToken();
         }
-
-        throw error;
     }
+
+    return res.status(500).json({ error: "Could not generate a unique token. Try again." });
 }
 
 export async function updateTag(req, res) {
@@ -75,6 +97,22 @@ export async function updateTag(req, res) {
     }
 
     return res.json({ tag });
+}
+
+export async function deleteTag(req, res) {
+    const id = Number(req.params.id);
+
+    if (!Number.isFinite(id)) {
+        return res.status(400).json({ error: "Invalid tag id" });
+    }
+
+    const deletedTag = await deleteNfcTagById(id);
+
+    if (!deletedTag) {
+        return res.status(404).json({ error: "Tag not found" });
+    }
+
+    return res.json({ ok: true, deletedTag });
 }
 
 export async function getNfcTag(req, res) {

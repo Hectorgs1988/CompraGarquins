@@ -3,11 +3,11 @@ import { apiRequest } from "../lib/api";
 
 function NfcConfigPage() {
     const [tags, setTags] = useState([]);
-    const [token, setToken] = useState("");
     const [itemName, setItemName] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [deletingTagId, setDeletingTagId] = useState(null);
     const [editingTagId, setEditingTagId] = useState(null);
     const [editingItemName, setEditingItemName] = useState("");
     const [editingQuantity, setEditingQuantity] = useState(1);
@@ -40,12 +40,11 @@ function NfcConfigPage() {
     async function handleCreateTag(event) {
         event.preventDefault();
 
-        const nextToken = token.trim();
         const nextItemName = itemName.trim();
         const nextQuantity = Number(quantity);
 
-        if (!nextToken || !nextItemName || !Number.isFinite(nextQuantity) || nextQuantity < 1) {
-            setError("Rellena token, producto y cantidad valida.");
+        if (!nextItemName || !Number.isFinite(nextQuantity) || nextQuantity < 1) {
+            setError("Rellena producto y cantidad valida.");
             return;
         }
 
@@ -54,21 +53,19 @@ function NfcConfigPage() {
             setError("");
             setSuccess("");
 
-            await apiRequest("/nfc/tags", {
+            const data = await apiRequest("/nfc/tags", {
                 method: "POST",
                 body: JSON.stringify({
-                    token: nextToken,
                     itemName: nextItemName,
                     quantity: nextQuantity,
                     isActive: true
                 })
             });
 
-            setToken("");
             setItemName("");
             setQuantity(1);
             await loadTags();
-            setSuccess("Pegatina NFC creada correctamente.");
+            setSuccess(`Pegatina NFC creada. Token: ${data.tag.token}`);
         } catch (requestError) {
             setError(requestError.message);
         } finally {
@@ -124,6 +121,37 @@ function NfcConfigPage() {
         }
     }
 
+    async function deleteTag(tag) {
+        const confirmed = window.confirm(
+            `¿Seguro que quieres eliminar la pegatina ${tag.token} (${tag.itemName})?`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setDeletingTagId(tag.id);
+            setError("");
+            setSuccess("");
+
+            await apiRequest(`/nfc/tags/${tag.id}`, {
+                method: "DELETE"
+            });
+
+            if (editingTagId === tag.id) {
+                cancelEditing();
+            }
+
+            await loadTags();
+            setSuccess("Pegatina NFC eliminada correctamente.");
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setDeletingTagId(null);
+        }
+    }
+
     return (
         <section className="nfc-config-page">
             <section className="panel panel--hero">
@@ -144,16 +172,11 @@ function NfcConfigPage() {
                 <div className="section-header">
                     <div>
                         <h3>Nueva pegatina</h3>
-                        <p className="section-subtitle">Vincula token y producto</p>
+                        <p className="section-subtitle">Vincula producto y cantidad (token automatico)</p>
                     </div>
                 </div>
 
                 <form className="inline-form inline-form--nfc" onSubmit={handleCreateTag}>
-                    <input
-                        value={token}
-                        onChange={(event) => setToken(event.target.value)}
-                        placeholder="Token NFC"
-                    />
                     <input
                         value={itemName}
                         onChange={(event) => setItemName(event.target.value)}
@@ -244,19 +267,38 @@ function NfcConfigPage() {
                                                 type="button"
                                                 className="icon-button"
                                                 onClick={cancelEditing}
-                                                disabled={saving}
+                                                disabled={saving || deletingTagId === tag.id}
                                             >
                                                 Cancelar
                                             </button>
+                                            <button
+                                                type="button"
+                                                className="secondary-button secondary-button--danger"
+                                                onClick={() => deleteTag(tag)}
+                                                disabled={saving || deletingTagId === tag.id}
+                                            >
+                                                {deletingTagId === tag.id ? "Eliminando..." : "Eliminar"}
+                                            </button>
                                         </div>
                                     ) : (
-                                        <button
-                                            type="button"
-                                            className="secondary-button"
-                                            onClick={() => startEditing(tag)}
-                                        >
-                                            Editar
-                                        </button>
+                                        <div className="nfc-actions">
+                                            <button
+                                                type="button"
+                                                className="secondary-button"
+                                                onClick={() => startEditing(tag)}
+                                                disabled={deletingTagId === tag.id}
+                                            >
+                                                Editar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="secondary-button secondary-button--danger"
+                                                onClick={() => deleteTag(tag)}
+                                                disabled={deletingTagId === tag.id}
+                                            >
+                                                {deletingTagId === tag.id ? "Eliminando..." : "Eliminar"}
+                                            </button>
+                                        </div>
                                     )}
                                 </li>
                             );
