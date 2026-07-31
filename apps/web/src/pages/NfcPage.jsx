@@ -56,11 +56,7 @@ function NfcPage() {
                 detail: data.item
             }));
         } catch (error) {
-            if (error.status === 401) {
-                setConsumeError("Necesitas iniciar sesion para consumir la etiqueta.");
-            } else {
-                setConsumeError(error.message);
-            }
+            setConsumeError(error.message);
         } finally {
             setConsuming(false);
         }

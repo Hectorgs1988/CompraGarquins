@@ -90,7 +90,7 @@ export async function getNfcTag(req, res) {
 
 export async function consumeTag(req, res) {
     const { token } = req.params;
-    const userId = req.session.user.id;
+    const userId = req.session?.user?.id ?? null;
     const result = await consumeNfcTag({ token, userId });
 
     if (!result) {

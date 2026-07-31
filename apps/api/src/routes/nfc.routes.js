@@ -6,15 +6,14 @@ import {
 	getNfcTags,
 	updateTag
 } from "../controllers/nfc.controller.js";
-import { requireAuth } from "../middleware/require-auth.js";
 
 const router = Router();
 
-router.get("/tags", requireAuth, getNfcTags);
-router.post("/tags", requireAuth, createTag);
-router.patch("/tags/:id", requireAuth, updateTag);
+router.get("/tags", getNfcTags);
+router.post("/tags", createTag);
+router.patch("/tags/:id", updateTag);
 
 router.get("/:token", getNfcTag);
-router.post("/:token/consume", requireAuth, consumeTag);
+router.post("/:token/consume", consumeTag);
 
 export default router;
