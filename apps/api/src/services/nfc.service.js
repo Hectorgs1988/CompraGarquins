@@ -65,6 +65,18 @@ export async function updateNfcTagById({ id, itemName, quantity, isActive }) {
     return normalizeTag(tag);
 }
 
+export async function deleteNfcTagById(id) {
+    const existingTag = await db("nfc_tags").where({ id }).first();
+
+    if (!existingTag) {
+        return null;
+    }
+
+    await db("nfc_tags").where({ id }).del();
+
+    return normalizeTag(existingTag);
+}
+
 export async function getNfcTagByToken(token) {
     const tag = await db("nfc_tags").where({ token }).first();
 

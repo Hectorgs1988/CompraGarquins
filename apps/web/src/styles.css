@@ -380,6 +380,12 @@ body {
     color: white;
 }
 
+.secondary-button--danger {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: white;
+}
+
 .secondary-button:hover,
 .icon-button:hover {
     background: rgba(11, 110, 100, 0.1);
@@ -387,6 +393,10 @@ body {
 
 .secondary-button:hover {
     background: var(--brand-strong);
+}
+
+.secondary-button--danger:hover {
+    background: #991b1b;
 }
 
 .empty-state {
