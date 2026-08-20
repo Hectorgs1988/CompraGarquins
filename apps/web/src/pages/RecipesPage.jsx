@@ -14,6 +14,7 @@ function RecipesPage() {
     const [selectedRecipeId, setSelectedRecipeId] = useState(null);
     const [addingIngredients, setAddingIngredients] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [editingRecipeId, setEditingRecipeId] = useState(null);
     const detailSectionRef = useRef(null);
 
     async function loadRecipes() {
@@ -48,8 +49,9 @@ function RecipesPage() {
             setSaving(true);
             setError("");
             setSuccess("");
-            await apiRequest("/recipes", {
-                method: "POST",
+            const isEditing = editingRecipeId !== null;
+            await apiRequest(isEditing ? `/recipes/${editingRecipeId}` : "/recipes", {
+                method: isEditing ? "PUT" : "POST",
                 body: JSON.stringify({
                     title: nextTitle,
                     description: description.trim(),
@@ -61,8 +63,9 @@ function RecipesPage() {
             setDescription("");
             setIngredients("");
             setSteps("");
+            setEditingRecipeId(null);
             await loadRecipes();
-            setSuccess("Receta guardada correctamente.");
+            setSuccess(isEditing ? "Receta actualizada correctamente." : "Receta guardada correctamente.");
         } catch (requestError) {
             setError(requestError.message);
         } finally {
@@ -102,6 +105,33 @@ function RecipesPage() {
         setSelectedRecipeId(recipeId);
     }
 
+    function startEditingRecipe(recipe) {
+        setTitle(recipe.title);
+        setDescription(recipe.description || "");
+        setIngredients((recipe.ingredients || []).join("\n"));
+        setSteps((recipe.steps || []).join("\n"));
+        setEditingRecipeId(recipe.id);
+        setShowCreateForm(true);
+    }
+
+    function closeRecipeForm() {
+        setShowCreateForm(false);
+        setEditingRecipeId(null);
+        setTitle("");
+        setDescription("");
+        setIngredients("");
+        setSteps("");
+    }
+
+    function startCreatingRecipe() {
+        setTitle("");
+        setDescription("");
+        setIngredients("");
+        setSteps("");
+        setEditingRecipeId(null);
+        setShowCreateForm(true);
+    }
+
     const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) || null;
 
     useEffect(() => {
@@ -130,10 +160,14 @@ function RecipesPage() {
                 <section className="panel panel--stacked">
                     <div className="section-header">
                         <div>
-                            <h3>Añadir receta</h3>
-                            <p className="section-subtitle">Crea una nueva receta con ingredientes y descripción</p>
+                            <h3>{editingRecipeId !== null ? "Editar receta" : "Añadir receta"}</h3>
+                            <p className="section-subtitle">
+                                {editingRecipeId !== null
+                                    ? "Modifica los datos de la receta publicada"
+                                    : "Crea una nueva receta con ingredientes y descripción"}
+                            </p>
                         </div>
-                        <button type="button" className="secondary-button" onClick={() => setShowCreateForm(false)}>
+                        <button type="button" className="secondary-button" onClick={closeRecipeForm}>
                             Cerrar
                         </button>
                     </div>
@@ -160,7 +194,7 @@ function RecipesPage() {
                             placeholder="Pasos para preparar la receta (uno por línea)"
                         />
                         <button type="submit" disabled={saving}>
-                            {saving ? "Guardando..." : "Guardar receta"}
+                            {saving ? "Guardando..." : editingRecipeId !== null ? "Actualizar receta" : "Guardar receta"}
                         </button>
                     </form>
 
@@ -177,7 +211,7 @@ function RecipesPage() {
                     </div>
                     <div className="basket-actions">
                         <span className="count-pill">{recipes.length}</span>
-                        <button type="button" className="secondary-button" onClick={() => setShowCreateForm(true)}>
+                        <button type="button" className="secondary-button" onClick={startCreatingRecipe}>
                             Añadir receta
                         </button>
                     </div>
@@ -256,6 +290,13 @@ function RecipesPage() {
                         </div>
                     ) : null}
 
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => startEditingRecipe(selectedRecipe)}
+                    >
+                        Editar receta
+                    </button>
                     <button
                         type="button"
                         className="secondary-button"

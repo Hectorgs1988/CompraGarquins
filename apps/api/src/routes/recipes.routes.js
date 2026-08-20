@@ -73,4 +73,38 @@ router.post("/", (req, res) => {
     return res.status(201).json({ recipe });
 });
 
+router.put("/:id", (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    const recipeIndex = recipes.findIndex((recipe) => recipe.id === id);
+
+    if (recipeIndex === -1) {
+        return res.status(404).json({ error: "recipe not found" });
+    }
+
+    const title = String(req.body?.title || "").trim();
+    const description = String(req.body?.description || "").trim();
+    const ingredients = normalizeIngredients(req.body?.ingredients);
+    const steps = normalizeSteps(req.body?.steps);
+
+    if (!title) {
+        return res.status(400).json({ error: "title is required" });
+    }
+
+    if (!ingredients.length) {
+        return res.status(400).json({ error: "ingredients are required" });
+    }
+
+    const recipe = {
+        id,
+        title,
+        description,
+        ingredients,
+        steps
+    };
+
+    recipes[recipeIndex] = recipe;
+
+    return res.json({ recipe });
+});
+
 export default router;
