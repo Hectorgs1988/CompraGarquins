@@ -107,4 +107,17 @@ router.put("/:id", (req, res) => {
     return res.json({ recipe });
 });
 
+router.delete("/:id", (req, res) => {
+    const id = Number.parseInt(req.params.id, 10);
+    const recipeIndex = recipes.findIndex((recipe) => recipe.id === id);
+
+    if (recipeIndex === -1) {
+        return res.status(404).json({ error: "recipe not found" });
+    }
+
+    recipes.splice(recipeIndex, 1);
+
+    return res.json({ ok: true, deletedRecipeId: id });
+});
+
 export default router;

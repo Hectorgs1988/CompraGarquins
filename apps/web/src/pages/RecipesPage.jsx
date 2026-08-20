@@ -16,6 +16,8 @@ function RecipesPage() {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingRecipeId, setEditingRecipeId] = useState(null);
     const detailSectionRef = useRef(null);
+    const formSectionRef = useRef(null);
+    const titleInputRef = useRef(null);
 
     async function loadRecipes() {
         try {
@@ -132,6 +134,25 @@ function RecipesPage() {
         setShowCreateForm(true);
     }
 
+    async function deleteRecipe(recipe) {
+        const confirmed = window.confirm(`¿Seguro que quieres eliminar la receta "${recipe.title}"?`);
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setError("");
+            setSuccess("");
+            await apiRequest(`/recipes/${recipe.id}`, { method: "DELETE" });
+            setSelectedRecipeId(null);
+            await loadRecipes();
+            setSuccess("Receta eliminada correctamente.");
+        } catch (requestError) {
+            setError(requestError.message);
+        }
+    }
+
     const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) || null;
 
     useEffect(() => {
@@ -139,6 +160,13 @@ function RecipesPage() {
             detailSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }, [selectedRecipe]);
+
+    useEffect(() => {
+        if (showCreateForm && formSectionRef.current) {
+            formSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+            titleInputRef.current?.focus({ preventScroll: true });
+        }
+    }, [showCreateForm, editingRecipeId]);
 
     return (
         <section className="recipes-page">
@@ -157,7 +185,7 @@ function RecipesPage() {
             </section>
 
             {showCreateForm ? (
-                <section className="panel panel--stacked">
+                <section ref={formSectionRef} className="panel panel--stacked">
                     <div className="section-header">
                         <div>
                             <h3>{editingRecipeId !== null ? "Editar receta" : "Añadir receta"}</h3>
@@ -174,6 +202,7 @@ function RecipesPage() {
 
                     <form className="recipe-form" onSubmit={handleSubmit}>
                         <input
+                            ref={titleInputRef}
                             value={title}
                             onChange={(event) => setTitle(event.target.value)}
                             placeholder="Nombre de la receta"
@@ -304,6 +333,13 @@ function RecipesPage() {
                         disabled={addingIngredients}
                     >
                         {addingIngredients ? "Añadiendo..." : "Añadir ingredientes a la lista"}
+                    </button>
+                    <button
+                        type="button"
+                        className="secondary-button secondary-button--danger"
+                        onClick={() => deleteRecipe(selectedRecipe)}
+                    >
+                        Eliminar receta
                     </button>
                 </section>
             ) : null}
