@@ -9,6 +9,8 @@ function ListPage() {
     const [savingItemId, setSavingItemId] = useState(null);
     const [finalizing, setFinalizing] = useState(false);
     const [quantityDrafts, setQuantityDrafts] = useState({});
+    const [editingNameItemId, setEditingNameItemId] = useState(null);
+    const [nameDrafts, setNameDrafts] = useState({});
 
     async function loadItems() {
         try {
@@ -128,6 +130,41 @@ function ListPage() {
                 body: JSON.stringify({ quantity: nextQuantity })
             });
             await loadItems();
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setSavingItemId(null);
+        }
+    }
+
+    function startEditingName(entry) {
+        setNameDrafts((current) => ({ ...current, [entry.id]: entry.name }));
+        setEditingNameItemId(entry.id);
+        setError("");
+    }
+
+    function cancelEditingName() {
+        setEditingNameItemId(null);
+    }
+
+    async function updateName(itemId) {
+        const nextName = String(nameDrafts[itemId] || "").trim();
+
+        if (!nextName) {
+            setError("El nombre del producto no puede estar vacío.");
+            return;
+        }
+
+        try {
+            setSavingItemId(itemId);
+            setError("");
+            await apiRequest(`/list/${itemId}`, {
+                method: "PATCH",
+                body: JSON.stringify({ name: nextName })
+            });
+            setEditingNameItemId(null);
+            await loadItems();
+            window.dispatchEvent(new CustomEvent("cesta:list-updated"));
         } catch (requestError) {
             setError(requestError.message);
         } finally {
@@ -285,8 +322,61 @@ function ListPage() {
                                     className={`item-row ${entry.source === "recipe" ? "item-row--recipe" : ""}`}
                                 >
                                     <span className="item-bullet" />
-                                    <div className="item-main">
-                                        <strong>{entry.name}</strong>
+                                    <div
+                                        className={`item-main ${editingNameItemId === entry.id ? "item-main--editing" : ""}`}
+                                    >
+                                        {editingNameItemId === entry.id ? (
+                                            <div className="item-name-editor">
+                                                <input
+                                                    className="item-name-input"
+                                                    value={nameDrafts[entry.id] ?? entry.name}
+                                                    onChange={(event) => {
+                                                        setNameDrafts((current) => ({
+                                                            ...current,
+                                                            [entry.id]: event.target.value
+                                                        }));
+                                                    }}
+                                                    onKeyDown={(event) => {
+                                                        if (event.key === "Enter") {
+                                                            event.preventDefault();
+                                                            updateName(entry.id);
+                                                        }
+
+                                                        if (event.key === "Escape") {
+                                                            cancelEditingName();
+                                                        }
+                                                    }}
+                                                    autoFocus
+                                                    aria-label={`Nombre de ${entry.name}`}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="item-name-action"
+                                                    onClick={() => updateName(entry.id)}
+                                                    disabled={savingItemId === entry.id}
+                                                >
+                                                    Guardar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="item-name-action item-name-action--cancel"
+                                                    onClick={cancelEditingName}
+                                                    disabled={savingItemId === entry.id}
+                                                >
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="item-name-button"
+                                                onClick={() => startEditingName(entry)}
+                                                disabled={savingItemId === entry.id}
+                                                aria-label={`Editar nombre de ${entry.name}`}
+                                            >
+                                                {entry.name}
+                                            </button>
+                                        )}
                                         <span className="item-meta">
                                             {entry.source === "recipe"
                                                 ? `Origen: receta${entry.recipe_group ? ` · ${entry.recipe_group}` : ""}`
