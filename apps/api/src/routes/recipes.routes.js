@@ -1,32 +1,40 @@
 import { Router } from "express";
+import { db } from "../db/knex.js";
 
 const router = Router();
 
-const recipes = [
-    {
-        id: 1,
-        title: "Tortilla de patatas",
-        description: "Una receta clásica para cualquier día de la semana.",
-        ingredients: ["patatas", "huevos", "cebolla", "aceite"],
-        steps: [
-            "Pela y corta las patatas y la cebolla.",
-            "Fríe las patatas y la cebolla hasta que estén blandas.",
-            "Bate los huevos y mézclalos con las verduras.",
-            "Cocina la tortilla por ambos lados y sirve."
-        ]
-    },
-    {
-        id: 2,
-        title: "Ensalada de pasta",
-        description: "Fácil de preparar y muy práctica para llevar.",
-        ingredients: ["pasta", "tomate", "atún", "aceitunas"],
-        steps: [
-            "Cuece la pasta y deja que se enfríe.",
-            "Mezcla la pasta con el tomate, el atún y las aceitunas.",
-            "Aliña con aceite y sirve fría."
-        ]
+function selectRecipeColumns() {
+    return ["id", "title", "description", "ingredients_json", "steps_json", "created_at"];
+}
+
+function parseJsonArray(value) {
+    if (!value) {
+        return [];
     }
-];
+
+    try {
+        const parsed = JSON.parse(value);
+        if (!Array.isArray(parsed)) {
+            return [];
+        }
+
+        return parsed
+            .map((entry) => String(entry || "").trim())
+            .filter(Boolean);
+    } catch {
+        return [];
+    }
+}
+
+function toRecipeResponse(row) {
+    return {
+        id: row.id,
+        title: row.title,
+        description: row.description || "",
+        ingredients: parseJsonArray(row.ingredients_json),
+        steps: parseJsonArray(row.steps_json)
+    };
+}
 
 function normalizeIngredients(ingredients) {
     return String(ingredients || "")
@@ -42,11 +50,17 @@ function normalizeSteps(steps) {
         .filter(Boolean);
 }
 
-router.get("/", (_req, res) => {
+router.get("/", async (_req, res) => {
+    const rows = await db("recipes")
+        .select(...selectRecipeColumns())
+        .orderBy("id", "desc");
+
+    const recipes = rows.map(toRecipeResponse);
+
     res.json({ recipes });
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
     const title = String(req.body?.title || "").trim();
     const description = String(req.body?.description || "").trim();
     const ingredients = normalizeIngredients(req.body?.ingredients);
@@ -60,24 +74,34 @@ router.post("/", (req, res) => {
         return res.status(400).json({ error: "ingredients are required" });
     }
 
-    const recipe = {
-        id: Date.now(),
+    const insertPayload = {
         title,
         description,
-        ingredients,
-        steps
+        ingredients_json: JSON.stringify(ingredients),
+        steps_json: JSON.stringify(steps),
+        created_at: db.fn.now()
     };
 
-    recipes.unshift(recipe);
+    const [recipeId] = await db("recipes").insert(insertPayload);
+
+    const row = await db("recipes")
+        .select(...selectRecipeColumns())
+        .where({ id: Number(recipeId) || recipeId })
+        .first();
+
+    const recipe = toRecipeResponse(row);
 
     return res.status(201).json({ recipe });
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
     const id = Number.parseInt(req.params.id, 10);
-    const recipeIndex = recipes.findIndex((recipe) => recipe.id === id);
+    const existingRecipe = await db("recipes")
+        .select("id")
+        .where({ id })
+        .first();
 
-    if (recipeIndex === -1) {
+    if (!existingRecipe) {
         return res.status(404).json({ error: "recipe not found" });
     }
 
@@ -94,28 +118,41 @@ router.put("/:id", (req, res) => {
         return res.status(400).json({ error: "ingredients are required" });
     }
 
-    const recipe = {
-        id,
+    const updatePayload = {
         title,
         description,
-        ingredients,
-        steps
+        ingredients_json: JSON.stringify(ingredients),
+        steps_json: JSON.stringify(steps)
     };
 
-    recipes[recipeIndex] = recipe;
+    await db("recipes")
+        .where({ id })
+        .update(updatePayload);
+
+    const row = await db("recipes")
+        .select(...selectRecipeColumns())
+        .where({ id })
+        .first();
+
+    const recipe = toRecipeResponse(row);
 
     return res.json({ recipe });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", async (req, res) => {
     const id = Number.parseInt(req.params.id, 10);
-    const recipeIndex = recipes.findIndex((recipe) => recipe.id === id);
+    const existingRecipe = await db("recipes")
+        .select("id")
+        .where({ id })
+        .first();
 
-    if (recipeIndex === -1) {
+    if (!existingRecipe) {
         return res.status(404).json({ error: "recipe not found" });
     }
 
-    recipes.splice(recipeIndex, 1);
+    await db("recipes")
+        .where({ id })
+        .del();
 
     return res.json({ ok: true, deletedRecipeId: id });
 });
