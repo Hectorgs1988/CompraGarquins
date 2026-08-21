@@ -77,4 +77,68 @@ export async function bootstrapDb() {
             created_at: db.fn.now()
         });
     }
+
+    const hasRecipes = await db.schema.hasTable("recipes");
+    if (!hasRecipes) {
+        await db.schema.createTable("recipes", (table) => {
+            table.increments("id").primary();
+            table.string("title").notNullable();
+            table.text("description").notNullable().defaultTo("");
+            table.text("ingredients_json").notNullable();
+            table.text("steps_json").notNullable();
+            table.timestamp("created_at").defaultTo(db.fn.now());
+        });
+    } else {
+        const hasDescriptionColumn = await db.schema.hasColumn("recipes", "description");
+        if (!hasDescriptionColumn) {
+            await db.schema.alterTable("recipes", (table) => {
+                table.text("description").notNullable().defaultTo("");
+            });
+        }
+
+        const hasIngredientsJsonColumn = await db.schema.hasColumn("recipes", "ingredients_json");
+        if (!hasIngredientsJsonColumn) {
+            await db.schema.alterTable("recipes", (table) => {
+                table.text("ingredients_json").notNullable().defaultTo("[]");
+            });
+        }
+
+        const hasStepsJsonColumn = await db.schema.hasColumn("recipes", "steps_json");
+        if (!hasStepsJsonColumn) {
+            await db.schema.alterTable("recipes", (table) => {
+                table.text("steps_json").notNullable().defaultTo("[]");
+            });
+        }
+    }
+
+    const existingRecipes = await db("recipes").count({ total: "id" }).first();
+    const recipesCount = Number(existingRecipes?.total || 0);
+
+    if (recipesCount === 0) {
+        await db("recipes").insert([
+            {
+                title: "Tortilla de patatas",
+                description: "Una receta clásica para cualquier día de la semana.",
+                ingredients_json: JSON.stringify(["patatas", "huevos", "cebolla", "aceite"]),
+                steps_json: JSON.stringify([
+                    "Pela y corta las patatas y la cebolla.",
+                    "Fríe las patatas y la cebolla hasta que estén blandas.",
+                    "Bate los huevos y mézclalos con las verduras.",
+                    "Cocina la tortilla por ambos lados y sirve."
+                ]),
+                created_at: db.fn.now()
+            },
+            {
+                title: "Ensalada de pasta",
+                description: "Fácil de preparar y muy práctica para llevar.",
+                ingredients_json: JSON.stringify(["pasta", "tomate", "atún", "aceitunas"]),
+                steps_json: JSON.stringify([
+                    "Cuece la pasta y deja que se enfríe.",
+                    "Mezcla la pasta con el tomate, el atún y las aceitunas.",
+                    "Aliña con aceite y sirve fría."
+                ]),
+                created_at: db.fn.now()
+            }
+        ]);
+    }
 }
